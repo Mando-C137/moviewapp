@@ -1,4 +1,4 @@
-import { prisma } from "../db";
+import { prisma } from "../../db";
 
 const getUserById = async (id: string) => {
   return await prisma.user.findFirst({ where: { id: id } });

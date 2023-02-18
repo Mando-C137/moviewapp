@@ -1,7 +1,7 @@
 // get, post, delete a movie by Id
 
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getMovieById } from "../../../server/database/movieFunctions";
+import { getMovieById } from "../../../server/utils/database/movieFunctions";
 
 export default async function handler(
   req: NextApiRequest,

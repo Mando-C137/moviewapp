@@ -1,4 +1,4 @@
-import { prisma } from "../db";
+import { prisma } from "../../db";
 
 const getMovieById = async (id: string) => {
   return await prisma.movie.findFirst({ where: { id: id } });

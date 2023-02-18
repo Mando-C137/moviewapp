@@ -1,6 +1,6 @@
 // get a user by id
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getUserById } from "../../../server/database/userFunctions";
+import { getUserById } from "../../../server/utils/database/userFunctions";
 
 export default async function handler(
   req: NextApiRequest,

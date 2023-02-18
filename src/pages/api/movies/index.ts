@@ -1,7 +1,7 @@
 // get movies with limit req// get a user by id or name
 
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getMoviesLimited } from "../../../server/database/movieFunctions";
+import { getMoviesLimited } from "../../../server/utils/database/movieFunctions";
 
 export default async function handler(
   req: NextApiRequest,
