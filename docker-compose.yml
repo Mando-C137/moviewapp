@@ -1,0 +1,18 @@
+version: "3.7"
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb_moview
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongoadmin
+      MONGO_INITDB_ROOT_PASSWORD: Xcv)7aBWS.Lv
+      MONGO_INITDB_DATABASE: moviewcluster
+    ports:
+      - 27017:27017
+    volumes:
+      - database:/data/db
+
+volumes:
+  database:
