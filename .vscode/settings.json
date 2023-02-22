@@ -3,5 +3,8 @@
   "editor.formatOnSave": true,
   "[prisma]": {
     "editor.defaultFormatter": "Prisma.prisma"
+  },
+  "files.associations": {
+    "*.env.*": "env"
   }
 }

@@ -1,18 +1,14 @@
-version: "3.7"
-
+version: "3.8"
 services:
-  mongodb:
-    image: mongo:latest
-    container_name: mongodb_moview
+  postgres:
+    image: postgres:latest
     restart: always
     environment:
-      MONGO_INITDB_ROOT_USERNAME: mongoadmin
-      MONGO_INITDB_ROOT_PASSWORD: Xcv)7aBWS.Lv
-      MONGO_INITDB_DATABASE: moviewcluster
-    ports:
-      - 27017:27017
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=passwort
     volumes:
-      - database:/data/db
-
+      - postgres:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
 volumes:
-  database:
+  postgres:
