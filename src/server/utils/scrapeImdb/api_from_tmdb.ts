@@ -1,4 +1,5 @@
 import axios from "axios";
+import { z } from "zod";
 import { env } from "../../../env.mjs";
 import type { ScrapeResult } from "./scrapeImdbSites";
 import { scrape } from "./scrapeImdbSites";
@@ -71,40 +72,35 @@ const fetchMovieByImdbId = async (id: string) => {
   }
 };
 
+export const movieSchema = z.object({
+  backdrop_path: z.string(),
+  id: z.number(),
+  imdb_id: z.string(),
+  original_title: z.string(),
+  overview: z.string(),
+  release_date: z.string(),
+  revenue: z.number(),
+  runtime: z.number(),
+  tagline: z.string(),
+  title: z.string(),
+  poster_path: z.string(),
+});
+
 const fetchMovieByTmdbId = async (idParam: number) => {
   try {
     const response = await axios.get(
       `${env.TMDB_BASE_URL}/movie/${idParam}?api_key=${env.TMDB_CLIENT_ID}&language=en-US`
     );
-    const {
-      backdrop_path,
-      id,
-      imdb_id,
-      original_title,
-      overview,
-      release_date,
-      revenue,
-      runtime,
-      tagline,
-      title,
-      poster_path,
-    } = response.data as TmdbResult;
+
+    const parsedMovie = movieSchema.parse(response.data);
 
     return {
-      backdrop_path,
-      id,
-      imdb_id,
-      original_title,
-      overview,
-      release_date,
-      revenue,
-      runtime,
-      tagline,
-      title,
-      poster_path,
+      ...parsedMovie,
+      revenue: Number((parsedMovie.revenue / 1_000_000).toFixed(2)),
     } as TmdbResult;
   } catch (e) {
     console.log(`error when fetching by tmdbId ${idParam}`);
+    console.log(e);
     return "error" as const;
   }
 };

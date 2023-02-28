@@ -68,7 +68,7 @@ model Movie {
     reviews       Review[]
     overview      String
     release_date  DateTime
-    revenue       BigInt
+    revenue       Float
     backdrop_path String
     runtime       Int
     rating        Float

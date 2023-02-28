@@ -1,6 +1,5 @@
 // get, post, delete a movie by Id
 
-import { insertBefore } from "cheerio/lib/api/manipulation";
 import type { NextApiRequest, NextApiResponse } from "next";
 import {
   getMovieByTmdbId,
@@ -50,7 +49,7 @@ const handleGET = async (id: string, res: NextApiResponse) => {
   const movie = await getMovieByTmdbId(myId);
 
   if (movie) {
-    res.status(200).json(movie);
+    res.status(200).json(movie.og_title);
   } else {
     res.status(404).json({ error: `movie with id ${id} was not found.` });
   }
