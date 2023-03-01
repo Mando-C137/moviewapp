@@ -100,7 +100,6 @@ const fetchMovieByTmdbId = async (idParam: number) => {
     } as TmdbResult;
   } catch (e) {
     console.log(`error when fetching by tmdbId ${idParam}`);
-    console.log(e);
     return "error" as const;
   }
 };

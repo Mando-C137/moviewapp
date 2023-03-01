@@ -70,6 +70,7 @@ model Movie {
     release_date  DateTime
     revenue       Float
     backdrop_path String
+    poster_path   String
     runtime       Int
     rating        Float
     createdAt     DateTime @default(now())

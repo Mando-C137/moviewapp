@@ -23,11 +23,12 @@ const getMoviesLimited = async (limit = 250) => {
 };
 
 const insertManyMovies = async (tmbdResult: TmdbResultWithImdbRating[]) => {
-  type movieDb = Prisma.MovieCreateInput;
+  type MovieDb = Prisma.MovieCreateInput;
 
-  const mapToDb = (res: TmdbResultWithImdbRating): movieDb => {
+  const mapToDb = (res: TmdbResultWithImdbRating): MovieDb => {
     return {
       backdrop_path: res.backdrop_path,
+      poster_path: res.poster_path ?? "",
       og_title: res.original_title,
       overview: res.overview,
       rating: res.imdb_rating,

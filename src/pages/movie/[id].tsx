@@ -11,6 +11,12 @@ import {
   getMoviesLimited,
   serializeMovie,
 } from "../../server/utils/database/movie";
+import { StarIcon } from "@heroicons/react/24/solid";
+import {
+  CalendarIcon,
+  CurrencyDollarIcon,
+  TvIcon,
+} from "@heroicons/react/24/outline";
 
 type Props = {
   message: "error" | ReturnType<typeof serializeMovie>;
@@ -26,21 +32,45 @@ const MovieComponent: React.FC<Props> = ({
   if (message === "error") return <div>error</div>;
   return (
     <>
-      <h1>{message.og_title}</h1>
-      <div>
-        <Image
-          width={300}
-          height={100}
-          src={`https://image.tmdb.org/t/p/w500/${message.backdrop_path}`}
-          alt="image"
-          placeholder="empty"
-        />
+      <div className="grid w-full grid-cols-1 px-4">
+        <div className="flex w-full items-baseline justify-center">
+          <Image
+            className="m-4 rounded-2xl"
+            width={300}
+            height={100}
+            src={`https://image.tmdb.org/t/p/w500/${message.backdrop_path}`}
+            alt="image"
+            placeholder="empty"
+          />
+        </div>
 
-        <p>{message.rating} / 10</p>
-        <p>{message.overview}</p>
-        <p> {message.revenue} millions</p>
-        <p>{new Date(message.release_date).toDateString()}</p>
-        <p>{message.runtime} minutes</p>
+        <h1 className="text-center text-2xl font-bold text-primary-500">
+          {message.og_title}
+        </h1>
+        <span className="inline-flex h-6 justify-end gap-2 text-base font-bold tracking-tight">
+          <StarIcon fill="#deb522"></StarIcon>
+          {message.rating} / 10
+        </span>
+        <p
+          className=" mt-6 rounded-lg bg-mygray-200 p-4 text-justify font-semibold text-mygray-800"
+          style={{ hyphens: "auto" }}
+        >
+          {message.overview}
+        </p>
+        <div className="grid grid-cols-1 gap-2 p-4">
+          <div className="flex items-center gap-x-4">
+            <CurrencyDollarIcon className="h-7" />
+            <p>{message.revenue} millions</p>
+          </div>
+          <div className="flex items-center gap-x-4">
+            <CalendarIcon className="h-7" />
+            <p> {new Date(message.release_date).toLocaleDateString()}</p>
+          </div>
+          <div className="flex items-center gap-x-4">
+            <TvIcon className="h-7" />
+            <p>{message.runtime} minutes</p>
+          </div>
+        </div>
       </div>
     </>
   );
