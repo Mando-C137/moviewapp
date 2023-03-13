@@ -50,6 +50,7 @@ model User {
     accounts      Account[]
     sessions      Session[]
     reviews       Review[]
+    favorites     Movie[]
 }
 
 model VerificationToken {
@@ -75,9 +76,11 @@ model Movie {
     rating        Float
     createdAt     DateTime @default(now())
     updatedAt     DateTime @updatedAt
+    favoredBy     User[]
 }
 
 model Review {
+    id         String   @id @default(cuid())
     reviewerId String
     reviewer   User     @relation(fields: [reviewerId], references: [id], onDelete: Cascade)
     movieId    Int
@@ -88,6 +91,4 @@ model Review {
     tagLine    String?
     createdAt  DateTime @default(now())
     updatedAt  DateTime @updatedAt
-
-    @@id([reviewerId, movieId])
 }

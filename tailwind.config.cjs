@@ -8,12 +8,12 @@ module.exports = {
     extend: {
       colors: {
         mygray: colors.slate,
-        primary: colors.blue,
+        primary: colors.orange,
         mygreen: colors.emerald,
         myred: colors.red,
         mywhite: colors.neutral,
       },
     },
   },
-  plugins: [require("daisyui")],
+  plugins: [require("daisyui"), require("@tailwindcss/forms")],
 };

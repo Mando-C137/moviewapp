@@ -3,7 +3,7 @@ import { signIn, signOut, useSession } from "next-auth/react";
 export const Header: React.FC = () => {
   const { data: session } = useSession();
 
-  const isSignedIn = !!session?.user;
+  const isSignedIn = session?.user;
 
   return (
     <div className="sticky flex items-baseline justify-between p-2">
@@ -15,7 +15,7 @@ export const Header: React.FC = () => {
         className="btn-link btn text-xl font-semibold text-primary-600 underline"
         onClick={() => (isSignedIn ? void signOut() : void signIn())}
       >
-        {isSignedIn ? "SignOut" : "SignIn"}
+        {isSignedIn ? `SignOut` : "SignIn"}
       </button>
     </div>
   );

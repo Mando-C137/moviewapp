@@ -1,10 +1,7 @@
 import { prisma } from "../../db";
-import type { Movie, Prisma } from "@prisma/client";
-import {
-  type TmdbResultWithImdbRating,
-  movieSchema,
-} from "../scrapeImdb/api_from_tmdb";
-import { z } from "zod";
+import type { Prisma } from "@prisma/client";
+import { type TmdbResultWithImdbRating } from "../scrapeImdb/api_from_tmdb";
+import { boolean } from "zod";
 
 const getMovieByTmdbId = async (id: number) => {
   return await prisma.movie.findFirst({ where: { tmdb_id: id } });
@@ -20,6 +17,33 @@ const getMoviesLimited = async (limit = 250) => {
       rating: "desc",
     },
   });
+};
+
+const addOrRemoveMovieFromFavorites = async ({
+  movieId,
+  userId,
+  add,
+}: {
+  movieId: number;
+  userId: string;
+  add: boolean;
+}) => {
+  try {
+    const user = add
+      ? await prisma.user.update({
+          where: { id: userId },
+          data: {
+            favorites: { connect: [{ tmdb_id: movieId }] },
+          },
+        })
+      : await prisma.user.update({
+          where: { id: userId },
+          data: { favorites: { disconnect: [{ tmdb_id: movieId }] } },
+        });
+    return user;
+  } catch (e) {
+    return "error";
+  }
 };
 
 const insertManyMovies = async (tmbdResult: TmdbResultWithImdbRating[]) => {
@@ -47,18 +71,10 @@ const insertManyMovies = async (tmbdResult: TmdbResultWithImdbRating[]) => {
   console.log(`saved ${storedMovies.count} movies to the db`);
 };
 
-export const serializeMovie = (movie: Movie) => {
-  return {
-    ...movie,
-    release_date: movie.release_date.toISOString(),
-    createdAt: null,
-    updatedAt: null,
-  };
-};
-
 export {
   getMovieByImdbId,
   getMovieByTmdbId,
   getMoviesLimited,
   insertManyMovies,
+  addOrRemoveMovieFromFavorites,
 };

@@ -1,17 +1,20 @@
 // get a user by id
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getUserById } from "../../../server/utils/database/userFunctions";
+import { getUserById } from "../../../../server/utils/database/user";
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  if (req.method != "GET") {
+  if (req.method === "GET") {
+    return handleGet(req, res);
+  } else {
     res.status(405).json({ error: "Unsupported method" });
-    return;
   }
+}
 
-  const { id } = req.query;
+const handleGet = async (req: NextApiRequest, res: NextApiResponse) => {
+  const { id: id } = req.query;
   const reviewer = await getUserById(id as string);
 
   if (reviewer) {
@@ -26,4 +29,4 @@ export default async function handler(
       .status(404)
       .json({ error: `No user with id ${id as string} was found` });
   }
-}
+};

@@ -54,8 +54,9 @@ CREATE TABLE "Movie" (
     "imdb_id" TEXT,
     "overview" TEXT NOT NULL,
     "release_date" TIMESTAMP(3) NOT NULL,
-    "revenue" INTEGER NOT NULL,
+    "revenue" DOUBLE PRECISION NOT NULL,
     "backdrop_path" TEXT NOT NULL,
+    "poster_path" TEXT NOT NULL,
     "runtime" INTEGER NOT NULL,
     "rating" DOUBLE PRECISION NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -66,6 +67,7 @@ CREATE TABLE "Movie" (
 
 -- CreateTable
 CREATE TABLE "Review" (
+    "id" TEXT NOT NULL,
     "reviewerId" TEXT NOT NULL,
     "movieId" INTEGER NOT NULL,
     "rating" DOUBLE PRECISION NOT NULL,
@@ -75,7 +77,13 @@ CREATE TABLE "Review" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "Review_pkey" PRIMARY KEY ("reviewerId","movieId")
+    CONSTRAINT "Review_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "_MovieToUser" (
+    "A" INTEGER NOT NULL,
+    "B" TEXT NOT NULL
 );
 
 -- CreateIndex
@@ -93,6 +101,12 @@ CREATE UNIQUE INDEX "VerificationToken_token_key" ON "VerificationToken"("token"
 -- CreateIndex
 CREATE UNIQUE INDEX "Movie_imdb_id_key" ON "Movie"("imdb_id");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "_MovieToUser_AB_unique" ON "_MovieToUser"("A", "B");
+
+-- CreateIndex
+CREATE INDEX "_MovieToUser_B_index" ON "_MovieToUser"("B");
+
 -- AddForeignKey
 ALTER TABLE "Account" ADD CONSTRAINT "Account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -104,3 +118,9 @@ ALTER TABLE "Review" ADD CONSTRAINT "Review_reviewerId_fkey" FOREIGN KEY ("revie
 
 -- AddForeignKey
 ALTER TABLE "Review" ADD CONSTRAINT "Review_movieId_fkey" FOREIGN KEY ("movieId") REFERENCES "Movie"("tmdb_id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_MovieToUser" ADD CONSTRAINT "_MovieToUser_A_fkey" FOREIGN KEY ("A") REFERENCES "Movie"("tmdb_id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_MovieToUser" ADD CONSTRAINT "_MovieToUser_B_fkey" FOREIGN KEY ("B") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
