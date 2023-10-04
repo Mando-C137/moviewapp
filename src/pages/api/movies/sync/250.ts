@@ -10,13 +10,15 @@ export default async function handler(
     let allMovies: TmdbResultWithImdbRating[] = [];
     try {
       allMovies = [...(await fetch250Movies())];
-      res.status(200).json({ length: allMovies.length, movies: allMovies });
+      return res
+        .status(200)
+        .json({ length: allMovies.length, movies: allMovies });
     } catch (e) {
-      res.status(500).json({ error: "Error when scraping imdb" });
+      return res.status(500).json({ error: "Error when scraping imdb" });
     }
 
     await insertManyMovies(allMovies);
   } else {
-    res.status(405).json({ error: "Unsupported method." });
+    return res.status(405).json({ error: "Unsupported method." });
   }
 }

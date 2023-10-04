@@ -1,18 +1,12 @@
-import type {
-  GetStaticPaths,
-  GetStaticProps,
-  InferGetStaticPropsType,
-} from "next";
-import React, { useState } from "react";
+import type { GetServerSideProps, InferGetServerSidePropsType } from "next";
+import React, { useEffect, useState } from "react";
 import {
-  getMovieByTmdbId,
-  getMoviesLimited,
+  createMovie,
+  getMovieByTitleId,
 } from "../../../server/utils/database/movie";
 import Image from "next/image";
 import type { ParsedUrlQuery } from "querystring";
-import { serializeMovie } from "../../../server/utils/database/serialize";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/router";
 import {
   CalendarIcon,
   CurrencyDollarIcon,
@@ -20,37 +14,56 @@ import {
   StarIcon,
   TvIcon,
 } from "@heroicons/react/24/solid";
-
 import { HeartIcon as OutlineHeartIcon } from "@heroicons/react/24/outline";
 import axios from "axios";
-
-type Props = {
-  movie: ReturnType<typeof serializeMovie>;
-};
+import type { Serialized } from "../../../server/utils/database/serialize";
+import serialize from "../../../server/utils/database/serialize";
+import type { Movie } from "@prisma/client";
+import * as TMDB_API from "../../../server/utils/tmdb_api";
+import { movieTitleToId } from "../../../utils/helpers";
+import Button from "../../../components/button/Button";
+import Routepage from "../../../components/Route/Routepage";
 
 type Params = ParsedUrlQuery & {
   id: string;
 };
+type Props = {
+  movie: Serialized<Movie>;
+};
 
-const MovieComponent: React.FC<Props> = ({
+const MovieComponent = ({
   movie,
-}: InferGetStaticPropsType<typeof getStaticProps>) => {
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session } = useSession();
 
   const user = session?.user ?? null;
 
-  const router = useRouter();
+  const [movieLiked, setMovieLiked] = useState<boolean | null>(null);
 
-  const handleReviewClicked = async (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => {
-    e.preventDefault();
+  useEffect(() => {
+    const fetchFavourites = async () => {
+      if (!user) {
+        setMovieLiked(null);
+        return;
+      }
 
-    const currentPath = router.asPath;
-    await router.push(`${currentPath}/reviews/create`);
-  };
+      try {
+        const favourites = (
+          await axios.get<{ favourites: number[] }>(
+            `/api/reviewers/${user.id}/favourites`
+          )
+        ).data;
 
-  const [movieLiked, setMovieLiked] = useState(true);
+        setMovieLiked(
+          favourites.favourites.some((tmdb_id) => tmdb_id === movie.tmdb_id)
+        );
+      } catch (e) {
+        setMovieLiked(null);
+      }
+    };
+
+    void fetchFavourites();
+  }, [user, movie]);
 
   const handleLikeClicked = async () => {
     if (!user) return;
@@ -78,87 +91,113 @@ const MovieComponent: React.FC<Props> = ({
         setMovieLiked(false);
       }
     }
-
-    //make an api request here
   };
 
   return (
-    <div className="grid w-full grid-cols-1 px-4">
-      <div className="flex w-full items-baseline justify-center">
-        <Image
-          className="m-4 rounded-2xl"
-          width={300}
-          height={100}
-          src={`https://image.tmdb.org/t/p/w500/${movie.backdrop_path}`}
-          alt="image"
-          placeholder="empty"
-        />
-      </div>
-
-      <h1 className="text-center text-2xl font-bold text-primary-500">
-        {movie.og_title}
-      </h1>
-      <span className="flex h-6 justify-end gap-2 text-base font-bold tracking-tight">
-        {session?.user && (
-          <button className="relative h-6 w-6" onClick={void handleLikeClicked}>
-            {movieLiked && (
-              <SolidHeartIcon
-                className="absolute inset-0"
-                fill="#db2777"
-              ></SolidHeartIcon>
+    <Routepage
+      name={movie.title}
+      action={{ type: "movie", name: movie.title, href: `/movies/${movie.id}` }}
+    >
+      <div className=" grid max-w-full grid-cols-1 space-y-2  px-4 py-2 md:mx-auto md:max-w-5xl md:space-y-2 lg:max-w-7xl">
+        <div className="relative mx-auto flex aspect-video w-full items-center justify-around md:w-[50vw]  ">
+          <Image
+            fill
+            className=" relative rounded-2xl object-contain after:absolute after:inset-0 after:h-[40%] after:bg-gradient-to-b after:from-transparent after:to-mygray-100 after:content-[''] "
+            src={TMDB_API.backdroppathImagepath(
+              movie.backdrop_path,
+              "original"
             )}
-            {!movieLiked && (
-              <OutlineHeartIcon className="absolute inset-0"></OutlineHeartIcon>
-            )}
-          </button>
-        )}
-        <StarIcon fill="#deb522"></StarIcon>
-        {movie.rating.toFixed(1)} / 10
-      </span>
-      {/*  <p
+            alt="image"
+          />
+        </div>
+        <h1 className="text-center text-4xl font-bold text-primary-500 ">
+          {movie.title}
+        </h1>
+        <span className="flex h-6 justify-end gap-2 text-base font-bold tracking-tight">
+          {session?.user && (
+            <button
+              className="relative h-6 w-6"
+              onClick={() => void handleLikeClicked()}
+            >
+              {movieLiked != null && movieLiked && (
+                <SolidHeartIcon
+                  className="absolute inset-0"
+                  fill="#db2777"
+                ></SolidHeartIcon>
+              )}
+              {movieLiked != null && !movieLiked && (
+                <OutlineHeartIcon className="absolute inset-0"></OutlineHeartIcon>
+              )}
+            </button>
+          )}
+          <StarIcon fill="#deb522"></StarIcon>
+          {movie.rating.toFixed(1)} / 10
+        </span>
+        {/*  <p
           className=" mt-6 rounded-lg bg-mygray-200 p-4 text-justify font-semibold text-mygray-800"
           style={{ hyphens: "auto" }}
         >
           {movie.overview}
         </p> */}
-      <div className="grid grid-cols-1 gap-2 p-4">
-        <div className="justify- flex items-center gap-x-4">
-          <CurrencyDollarIcon className="h-7" />
-          <p>{movie.revenue} millions</p>
+        <div className="grid grid-cols-1 gap-2 p-4">
+          <div className="justify- flex items-center gap-x-4">
+            <CurrencyDollarIcon className="h-7" />
+            <p>{movie.revenue} millions</p>
+          </div>
+          <div className="flex items-center gap-x-4">
+            <CalendarIcon className="h-7" />
+            <p> {new Date(movie.release_date).toLocaleDateString()}</p>
+          </div>
+          <div className="flex items-center gap-x-4">
+            <TvIcon className="h-7" />
+            <p>{movie.runtime} minutes</p>
+          </div>
         </div>
-        <div className="flex items-center gap-x-4">
-          <CalendarIcon className="h-7" />
-          <p> {new Date(movie.release_date).toLocaleDateString()}</p>
-        </div>
-        <div className="flex items-center gap-x-4">
-          <TvIcon className="h-7" />
-          <p>{movie.runtime} minutes</p>
+        <div className="flex justify-end">
+          <Button
+            as="link"
+            role="button"
+            action={`/movies/${movie.id}/reviews/create`}
+          >
+            Review this movie
+          </Button>
         </div>
       </div>
-      <div>
-        <button
-          className="btn-success btn"
-          onClick={(e) => void handleReviewClicked(e)}
-        >
-          Review this moview
-        </button>
-      </div>
-    </div>
+    </Routepage>
   );
 };
 
-export const getStaticProps: GetStaticProps<Props, Params> = async ({
+//export const getStaticProps: GetStaticProps<Props, Params> = async ({
+export const getServerSideProps: GetServerSideProps<Props, Params> = async ({
   params,
 }) => {
   if (params) {
-    const movie = await getMovieByTmdbId(Number(params.id));
+    const movie = await getMovieByTitleId(params.id);
 
     if (movie) {
       return {
         props: {
-          movie: serializeMovie(movie),
+          movie: serialize(movie),
         },
       };
+    }
+
+    const tmdbResult = await TMDB_API.searchMovie(params.id);
+    const possibleMovie = tmdbResult.find(
+      (result) => movieTitleToId(result.title) === params.id.toLowerCase()
+    );
+    if (possibleMovie) {
+      const movie = await TMDB_API.fetchMovieByTmdbId(possibleMovie.id);
+      if (movie !== "error") {
+        const savedMovie = await createMovie({ ...movie, imdb_rating: 0 });
+        if (savedMovie !== "error" && savedMovie) {
+          return {
+            props: {
+              movie: serialize(savedMovie),
+            },
+          };
+        }
+      }
     }
   }
 
@@ -167,12 +206,12 @@ export const getStaticProps: GetStaticProps<Props, Params> = async ({
   };
 };
 
-export const getStaticPaths: GetStaticPaths<Params> = async () => {
-  const movies = await getMoviesLimited();
+/* export const getStaticPaths: GetStaticPaths<Params> = async () => {
+  const movies = await getMoviesLimited(1000);
 
-  const paths = movies.map((movie) => ({ params: { id: `${movie.tmdb_id}` } }));
+  const paths = movies.map((movie) => ({ params: { id: movie.id } }));
 
-  return { paths, fallback: false };
-};
+  return { paths, fallback: true };
+}; */
 
 export default MovieComponent;

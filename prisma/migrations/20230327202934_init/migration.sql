@@ -48,6 +48,7 @@ CREATE TABLE "VerificationToken" (
 
 -- CreateTable
 CREATE TABLE "Movie" (
+    "id" TEXT NOT NULL,
     "tmdb_id" INTEGER NOT NULL,
     "title" TEXT NOT NULL,
     "og_title" TEXT NOT NULL,
@@ -62,7 +63,7 @@ CREATE TABLE "Movie" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "Movie_pkey" PRIMARY KEY ("tmdb_id")
+    CONSTRAINT "Movie_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -82,7 +83,7 @@ CREATE TABLE "Review" (
 
 -- CreateTable
 CREATE TABLE "_MovieToUser" (
-    "A" INTEGER NOT NULL,
+    "A" TEXT NOT NULL,
     "B" TEXT NOT NULL
 );
 
@@ -99,7 +100,16 @@ CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 CREATE UNIQUE INDEX "VerificationToken_token_key" ON "VerificationToken"("token");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Movie_tmdb_id_key" ON "Movie"("tmdb_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Movie_title_key" ON "Movie"("title");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Movie_imdb_id_key" ON "Movie"("imdb_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Review_reviewerId_movieId_key" ON "Review"("reviewerId", "movieId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "_MovieToUser_AB_unique" ON "_MovieToUser"("A", "B");
@@ -120,7 +130,7 @@ ALTER TABLE "Review" ADD CONSTRAINT "Review_reviewerId_fkey" FOREIGN KEY ("revie
 ALTER TABLE "Review" ADD CONSTRAINT "Review_movieId_fkey" FOREIGN KEY ("movieId") REFERENCES "Movie"("tmdb_id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "_MovieToUser" ADD CONSTRAINT "_MovieToUser_A_fkey" FOREIGN KEY ("A") REFERENCES "Movie"("tmdb_id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "_MovieToUser" ADD CONSTRAINT "_MovieToUser_A_fkey" FOREIGN KEY ("A") REFERENCES "Movie"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_MovieToUser" ADD CONSTRAINT "_MovieToUser_B_fkey" FOREIGN KEY ("B") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

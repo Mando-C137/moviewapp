@@ -1,14 +1,17 @@
 import { prisma } from "../../db";
 import type { Prisma } from "@prisma/client";
 import { type TmdbResultWithImdbRating } from "../scrapeImdb/api_from_tmdb";
-import { boolean } from "zod";
+import { movieTitleToId } from "../../../utils/helpers";
 
-const getMovieByTmdbId = async (id: number) => {
-  return await prisma.movie.findFirst({ where: { tmdb_id: id } });
+const getMovieByTitleId = async (id: string) => {
+  return await prisma.movie.findUnique({ where: { id: id } });
 };
 
 const getMovieByImdbId = async (id: string) => {
-  return await prisma.movie.findFirst({ where: { imdb_id: id } });
+  return await prisma.movie.findUnique({ where: { imdb_id: id } });
+};
+const getMovieByTmdbId = async (id: number) => {
+  return await prisma.movie.findUnique({ where: { tmdb_id: id } });
 };
 const getMoviesLimited = async (limit = 250) => {
   return await prisma.movie.findMany({
@@ -62,19 +65,34 @@ const insertManyMovies = async (tmbdResult: TmdbResultWithImdbRating[]) => {
       runtime: res.runtime,
       title: res.title,
       imdb_id: res.imdb_id,
+      id: movieTitleToId(res.title),
     };
   };
 
   const toDbList = tmbdResult.map(mapToDb);
 
-  const storedMovies = await prisma.movie.createMany({ data: toDbList });
+  const storedMovies = await prisma.movie.createMany({
+    data: toDbList,
+    skipDuplicates: true,
+  });
   console.log(`saved ${storedMovies.count} movies to the db`);
 };
 
+const createMovie = async (movie: TmdbResultWithImdbRating) => {
+  try {
+    await insertManyMovies([movie]);
+  } catch (e) {
+    return "error";
+  }
+  return await getMovieByTmdbId(movie.id);
+};
+
 export {
+  getMovieByTitleId,
   getMovieByImdbId,
   getMovieByTmdbId,
   getMoviesLimited,
   insertManyMovies,
+  createMovie,
   addOrRemoveMovieFromFavorites,
 };

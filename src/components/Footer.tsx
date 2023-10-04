@@ -1,6 +1,8 @@
+import Link from "next/link";
+
 export const Footer: React.FC = () => {
   return (
-    <footer className="mt-4 border-t  border-t-mygray-100 pb-16 pt-4">
+    <footer className=" mt-auto border-t border-t-mygray-100 pb-16 pt-4">
       <div className="grid grid-cols-2">
         <h4 className="px-4 py-2 text-lg uppercase text-primary-600">moview</h4>
 
@@ -8,13 +10,13 @@ export const Footer: React.FC = () => {
           <nav>
             <ul className="flex flex-col gap-2">
               <li>
-                <a href="./">Top250</a>
+                <Link href="/movies">Top250</Link>
               </li>
               <li>
-                <a href="./">Newest Movies</a>
+                <Link href="/movies">Movies</Link>
               </li>
               <li>
-                <a href="./">Top Reviewer</a>
+                <Link href="/reviewers">Reviewers</Link>
               </li>
             </ul>
           </nav>

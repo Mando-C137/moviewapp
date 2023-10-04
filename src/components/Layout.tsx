@@ -1,5 +1,6 @@
 import { Footer } from "./Footer";
-import { Header } from "./Header";
+import { Header } from "./header/Header";
+import HeaderDesktopMenu from "./menu/HeaderDesktopMenu";
 
 type DashboardLayoutProps = {
   children: React.ReactNode;
@@ -7,10 +8,15 @@ type DashboardLayoutProps = {
 
 export const Layout: React.FC<DashboardLayoutProps> = ({ children }) => {
   return (
-    <div className="min-h-[100vh] min-w-[100vw] bg-mygray-100 px-4 font-sans">
-      <Header></Header>
-      {children}
-      <Footer></Footer>
-    </div>
+    <>
+      <div className="max-w-8xl mx-auto flex min-h-screen flex-col  bg-mygray-50 px-4 sm:px-6 lg:px-8">
+        <Header></Header>
+        <div className="flex flex-row md:gap-6 ">
+          <HeaderDesktopMenu></HeaderDesktopMenu>
+          {children}
+        </div>
+        <Footer></Footer>
+      </div>
+    </>
   );
 };

@@ -5,17 +5,138 @@ export const getAllReviewers = async () => {
 };
 
 export const userExists = async (id: string) => {
-  return (await prisma.user.count({ where: { id: id } })) > 0;
+  return (await prisma.user.count({ where: { id } })) > 0;
 };
 
 export const getUserById = async (id: string) => {
-  return await prisma.user.findFirst({ where: { id: id } });
+  return await prisma.user.findFirst({
+    where: { id },
+  });
+};
+
+export const getUsersFavourites = async ({ id }: { id: string }) => {
+  const favourites = await prisma.user.findFirst({
+    where: { id },
+    select: { favorites: { select: { tmdb_id: true } } },
+  });
+
+  return favourites?.favorites.map((obj) => obj.tmdb_id) ?? null;
 };
 
 export const getUserByName = async (name: string) => {
-  return await prisma.user.findFirst({ where: { name: name } });
+  return await prisma.user.findFirst({
+    where: { name },
+  });
+};
+
+export const getMoviesIsUsersFavourite = async ({
+  tmdb_id,
+  userId,
+}: {
+  tmdb_id: number;
+  userId: string;
+}) => {
+  const movieIsInFavouriteList = await prisma.user.findFirst({
+    where: { id: userId, favorites: { some: { tmdb_id } } },
+  });
+
+  return movieIsInFavouriteList !== null;
 };
 
 export const findAllUsers = async () => {
   return await prisma.user.findMany();
+};
+
+// TODO maybe own file for collections
+export const createCollectionForUser = async ({
+  title,
+  userId,
+  movieIds,
+  description,
+}: {
+  title: string;
+  userId: string;
+  movieIds: number[];
+  description: string;
+}) => {
+  const createdCollection = await prisma.collection.create({
+    data: {
+      title,
+      ownerId: userId,
+      description,
+      movies: {
+        connect: movieIds.map((movieId) => {
+          return { tmdb_id: movieId };
+        }),
+      },
+    },
+  });
+  return createdCollection;
+};
+
+export const getCollectionById = async (id: string) => {
+  try {
+    const collection = await prisma.collection.findUnique({
+      where: { id },
+      include: { owner: true, movies: true },
+    });
+    return collection === null ? ("error" as const) : collection;
+  } catch (e) {
+    return "error" as const;
+  }
+};
+
+export const setCollectionMovies = async ({
+  id,
+  movieIds,
+}: {
+  id: string;
+  movieIds: number[];
+}) => {
+  const movies = movieIds.map((movieId) => {
+    return { tmdb_id: movieId };
+  });
+  try {
+    const collection = await prisma.collection.update({
+      where: { id },
+      data: { movies: { set: movies } },
+    });
+    return collection;
+  } catch (e) {
+    return "error";
+  }
+};
+
+export const editCollection = async (
+  collectionId: string,
+  {
+    title,
+    movieIds,
+    description,
+  }: {
+    title: string;
+    movieIds: number[];
+    description: string;
+  }
+) => {
+  const createdCollection = await prisma.collection.update({
+    where: { id: collectionId },
+    data: {
+      title,
+      description,
+      movies: {
+        set: movieIds.map((movieId) => {
+          return { tmdb_id: movieId };
+        }),
+      },
+    },
+  });
+  return createdCollection;
+};
+
+export const deleteCollection = async (collectionId: string) => {
+  const createdCollection = await prisma.collection.delete({
+    where: { id: collectionId },
+  });
+  return createdCollection;
 };

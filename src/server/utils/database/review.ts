@@ -13,6 +13,24 @@ export const getReviewsWithMovieByMovieId = async (movieId: number) => {
   return reviewsWithMovie;
 };
 
+export const getReviewById = async (id: string) => {
+  return await prisma.review.findUnique({ where: { id: id } });
+};
+
+export const getReviewByMovieIdAndUserId = async ({
+  movieId,
+  userId,
+}: {
+  movieId: string;
+  userId: string;
+}) => {
+  const review = await prisma.review.findFirst({
+    where: { reviewerId: userId, movie: { id: movieId } },
+  });
+
+  return review;
+};
+
 export const createReview = async ({
   rating,
   title,
@@ -34,6 +52,30 @@ export const createReview = async ({
       movieId: movieId,
       reviewerId: reviewerId,
     },
+    include: { movie: { select: { id: true } } },
   });
   return newReview;
+};
+export const updateReview = async ({
+  rating,
+  title,
+  content,
+  id,
+}: {
+  rating: number;
+  title: string;
+  content: string;
+  id: string;
+}) => {
+  const updatedReview = await prisma.review.update({
+    data: {
+      rating: rating,
+      title: title,
+      content: content,
+    },
+    where: {
+      id: id,
+    },
+  });
+  return updatedReview;
 };

@@ -5,11 +5,9 @@ import {
   getMovieByTmdbId,
   insertManyMovies,
 } from "../../../server/utils/database/movie";
-import {
-  fetchMovieByImdbId,
-  fetchMovieByTmdbId,
-} from "../../../server/utils/scrapeImdb/api_from_tmdb";
+import { fetchMovieByImdbId } from "../../../server/utils/scrapeImdb/api_from_tmdb";
 import { scrape } from "../../../server/utils/scrapeImdb/scrapeImdbSites";
+import TMDB_API from "../../../server/utils/tmdb_api";
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -30,7 +28,9 @@ export default async function handler(
     const rating = scrapeRating[0]?.imdbRating;
 
     if (result !== "error" && result.movie_results[0]) {
-      const data = await fetchMovieByTmdbId(result.movie_results[0]?.id);
+      const data = await TMDB_API.fetchMovieByTmdbId(
+        result.movie_results[0]?.id
+      );
       if (data !== "error") {
         await insertManyMovies([{ ...data, imdb_rating: rating as number }]);
         res

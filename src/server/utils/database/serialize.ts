@@ -1,34 +1,28 @@
-import type { Movie, Review } from "@prisma/client";
-import { z } from "zod";
-
-const reviewSchema = z.object({
-  id: z.string(),
-  reviewerId: z.string(),
-  movieId: z.number(),
-  content: z.string(),
-  title: z.string(),
-  rating: z.number(),
-});
-
-export const serializeReview = <U extends Review>(review: U) => {
-  return reviewSchema.parse(review);
+export type Serialized<T> = {
+  [key in keyof T]: T[key] extends Date
+    ? string
+    : T[key] extends object
+    ? Serialized<T[key]>
+    : T[key];
 };
 
-const movieSchema = z.object({
-  tmdb_id: z.number(),
-  title: z.string(),
-  og_title: z.string(),
-  imdb_id: z.string().nullable(),
-  overview: z.string(),
-  release_date: z.date(),
-  revenue: z.number(),
-  backdrop_path: z.string(),
-  poster_path: z.string(),
-  runtime: z.number(),
-  rating: z.number(),
-});
+function serialize<T extends object>(obj: T): Serialized<T> {
+  const res: { [key: string]: unknown } = {};
+  for (const key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      const value = obj[key];
+      if (value instanceof Date) {
+        res[key] = value.toISOString();
+      } else if (typeof value === "object" && Array.isArray(value)) {
+        res[key] = value.map((val) => serialize(val));
+      } else if (typeof value === "object" && value instanceof Object) {
+        res[key] = serialize(value);
+      } else {
+        res[key] = value;
+      }
+    }
+  }
+  return res as Serialized<T>;
+}
 
-export const serializeMovie = <U extends Movie>(movie: U) => {
-  const res = movieSchema.parse(movie);
-  return { ...res, release_date: res.release_date.toISOString() };
-};
+export default serialize;

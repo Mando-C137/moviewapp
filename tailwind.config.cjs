@@ -8,7 +8,7 @@ module.exports = {
     extend: {
       colors: {
         mygray: colors.slate,
-        primary: colors.orange,
+        primary: colors.blue,
         mygreen: colors.emerald,
         myred: colors.red,
         mywhite: colors.neutral,

@@ -18,7 +18,7 @@ const bodySchemaForPostReview = z.object({
   movieId: z.number(),
   title: z.string(),
   content: z.string(),
-  rating: z.number().min(1).max(5).multipleOf(0.5),
+  rating: z.number().min(1).max(10).multipleOf(1),
 });
 
 const handlePost = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -36,11 +36,9 @@ const handlePost = async (req: NextApiRequest, res: NextApiResponse) => {
     });
 
     res.status(201).json({
-      url: `/movies/${reviewCreated.movieId}/reviews/${reviewCreated.id}`,
+      url: `/movies/${reviewCreated.movie.id}/reviews/${reviewCreated.id}`,
     });
   } else {
-    res
-      .status(400)
-      .json({ error: "missing some information to create review" });
+    res.status(400).json({ error: "missing information to create review" });
   }
 };

@@ -42,15 +42,16 @@ model Session {
 }
 
 model User {
-    id            String    @id @default(cuid())
+    id            String       @id @default(cuid())
     name          String?
-    email         String?   @unique
+    email         String?      @unique
     emailVerified DateTime?
     image         String?
     accounts      Account[]
     sessions      Session[]
     reviews       Review[]
     favorites     Movie[]
+    collections   Collection[]
 }
 
 model VerificationToken {
@@ -62,21 +63,23 @@ model VerificationToken {
 }
 
 model Movie {
-    tmdb_id       Int      @id
-    title         String
-    og_title      String
-    imdb_id       String?  @unique
-    reviews       Review[]
-    overview      String
-    release_date  DateTime
-    revenue       Float
-    backdrop_path String
-    poster_path   String
-    runtime       Int
-    rating        Float
-    createdAt     DateTime @default(now())
-    updatedAt     DateTime @updatedAt
-    favoredBy     User[]
+    id              String            @id // title of movie in x-y-format
+    tmdb_id         Int               @unique
+    title           String            @unique
+    og_title        String
+    imdb_id         String?           @unique
+    reviews         Review[]
+    overview        String
+    release_date    DateTime
+    revenue         Float
+    backdrop_path   String
+    poster_path     String
+    runtime         Int
+    rating          Float
+    createdAt       DateTime          @default(now())
+    updatedAt       DateTime          @updatedAt
+    favoredBy       User[]
+    CollectionMovie CollectionMovie[]
 }
 
 model Review {
@@ -91,4 +94,27 @@ model Review {
     tagLine    String?
     createdAt  DateTime @default(now())
     updatedAt  DateTime @updatedAt
+}
+
+model Collection {
+    id          String            @id @default(cuid())
+    title       String
+    owner       User?             @relation(fields: [ownerId], references: [id], onDelete: Cascade) // kann auch user-lose Collection sein
+    ownerId     String
+    description String
+    createdAt   DateTime          @default(now())
+    updatedAt   DateTime          @updatedAt
+    movies      CollectionMovie[]
+
+    @@unique([title, ownerId])
+}
+
+model CollectionMovie {
+    collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+    collectionId String
+    movie        Movie      @relation(fields: [movieId], references: [tmdb_id], onDelete: Cascade)
+    movieId      Int
+    rank         Int
+
+    @@unique([collectionId, movieId])
 }

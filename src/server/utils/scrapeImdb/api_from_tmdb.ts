@@ -1,8 +1,9 @@
 import axios from "axios";
-import { z } from "zod";
 import { env } from "../../../env.mjs";
 import type { ScrapeResult } from "./scrapeImdbSites";
 import { scrape } from "./scrapeImdbSites";
+import type { TmdbResult } from "../tmdb_api";
+import * as TMDB_API from "../tmdb_api";
 
 const fetch250Movies = async () => {
   const top250Imdb = await scrape({ type: "top250" });
@@ -40,7 +41,7 @@ const fetchByScrapeIds = async (scrapeResults: ScrapeResult[]) => {
       continue;
     }
     allFinalTmdbFetches.push(
-      fetchMovieByTmdbId(imdbResult.movie_results[0].id)
+      TMDB_API.fetchMovieByTmdbId(imdbResult.movie_results[0].id)
     );
   }
 
@@ -72,38 +73,6 @@ const fetchMovieByImdbId = async (id: string) => {
   }
 };
 
-export const movieSchema = z.object({
-  backdrop_path: z.string(),
-  id: z.number(),
-  imdb_id: z.string(),
-  original_title: z.string(),
-  overview: z.string(),
-  release_date: z.string(),
-  revenue: z.number(),
-  runtime: z.number(),
-  tagline: z.string(),
-  title: z.string(),
-  poster_path: z.string(),
-});
-
-const fetchMovieByTmdbId = async (idParam: number) => {
-  try {
-    const response = await axios.get(
-      `${env.TMDB_BASE_URL}/movie/${idParam}?api_key=${env.TMDB_CLIENT_ID}&language=en-US`
-    );
-
-    const parsedMovie = movieSchema.parse(response.data);
-
-    return {
-      ...parsedMovie,
-      revenue: Number((parsedMovie.revenue / 1_000_000).toFixed(2)),
-    } as TmdbResult;
-  } catch (e) {
-    console.log(`error when fetching by tmdbId ${idParam}`);
-    return "error" as const;
-  }
-};
-
 type ImdbResult = {
   movie_results: {
     id: number;
@@ -111,24 +80,5 @@ type ImdbResult = {
   }[];
 };
 
-type TmdbResult = {
-  backdrop_path: string;
-  id: number;
-  imdb_id: string;
-  original_title: string;
-  overview: string;
-  poster_path?: string;
-  release_date: string;
-  revenue: number;
-  runtime: number;
-  tagline: string;
-  title: string;
-};
-export {
-  fetch250Movies,
-  fetch1000Movies,
-  scrapeByImdbId,
-  fetchMovieByTmdbId,
-  fetchMovieByImdbId,
-};
+export { fetch250Movies, fetch1000Movies, scrapeByImdbId, fetchMovieByImdbId };
 export type TmdbResultWithImdbRating = TmdbResult & { imdb_rating: number };
