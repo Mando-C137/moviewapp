@@ -25,7 +25,6 @@ export const movieSchema = z.object({
   release_date: z.string(),
   revenue: z.number(),
   runtime: z.number(),
-  tagline: z.string(),
   title: z.string(),
   poster_path: z.string(),
 });
@@ -66,15 +65,33 @@ export const fetchMovieByTmdbId = async (idParam: number) => {
     return "error" as const;
   }
 };
+
+export type ImdbResult = {
+  movie_results: {
+    id: number;
+    title: string;
+  }[];
+};
+export const fetchMovieByImdbId = async (id: string) => {
+  try {
+    const response = await axios.get<ImdbResult>(
+      `${env.TMDB_BASE_URL}/find/${id}?api_key=${env.TMDB_CLIENT_ID}&language=en-US&external_source=imdb_id`
+    );
+    return { ...response.data };
+  } catch (e) {
+    console.log(`error when fetching movie from TMDB API by imdb id = ${id}`);
+    return "error";
+  }
+};
 export const backdroppathImagepath = (
   backdrop_path: string,
   quality: "w300" | "w780" | "w1280" | "w1280" | "original" = "w780"
 ) => {
-  return `https://image.tmdb.org/t/p/${quality}/${backdrop_path}`;
+  return `https://image.tmdb.org/t/p/${quality}/${backdrop_path}` as const;
 };
 export const posterpathImagepath = (
   poster_path: string,
   quality: "w342" | "w500" | "w780" | "original" = "w780"
 ) => {
-  return `https://image.tmdb.org/t/p/${quality}/${poster_path}`;
+  return `https://image.tmdb.org/t/p/${quality}/${poster_path}` as const;
 };

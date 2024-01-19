@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import React from "react";
 import { getMoviesLimited } from "../../server/utils/database/movie";
-import serialize from "../../server/utils/database/serialize";
+import serialize, { Serialized } from "../../server/utils/database/serialize";
 import * as TMDB_API from "../../server/utils/tmdb_api";
 import Routepage from "../../components/Route/Routepage";
 
@@ -39,7 +39,7 @@ const MoviesRoute = ({
                     width={10}
                     className="h-12 w-12"
                   ></Image>
-                  <p>{movie.rating.toFixed(1)} / 10</p>
+                  <p>{movie.imdb.rating.toFixed(1)} / 10</p>
                 </div>
               </div>
               <div className="col-span-2">
@@ -61,7 +61,7 @@ const MoviesRoute = ({
 };
 
 export const getStaticProps = async () => {
-  const movies = await getMoviesLimited(30);
+  const movies = await getMoviesLimited(100);
 
   const serializedMovies = movies.map((movie) => serialize(movie));
   return {

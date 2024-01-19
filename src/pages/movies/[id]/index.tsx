@@ -131,7 +131,7 @@ const MovieComponent = ({
             </button>
           )}
           <StarIcon fill="#deb522"></StarIcon>
-          {movie.rating.toFixed(1)} / 10
+          {movie.imdb.rating.toFixed(1)} / 10
         </span>
         {/*  <p
           className=" mt-6 rounded-lg bg-mygray-200 p-4 text-justify font-semibold text-mygray-800"
@@ -184,12 +184,16 @@ export const getServerSideProps: GetServerSideProps<Props, Params> = async ({
 
     const tmdbResult = await TMDB_API.searchMovie(params.id);
     const possibleMovie = tmdbResult.find(
-      (result) => movieTitleToId(result.title) === params.id.toLowerCase()
+      (result) =>
+        movieTitleToId(
+          result.title,
+          new Date(result.release_date).getFullYear()
+        ) === params.id.toLowerCase()
     );
     if (possibleMovie) {
       const movie = await TMDB_API.fetchMovieByTmdbId(possibleMovie.id);
       if (movie !== "error") {
-        const savedMovie = await createMovie({ ...movie, imdb_rating: 0 });
+        const savedMovie = await createMovie({ ...movie });
         if (savedMovie !== "error" && savedMovie) {
           return {
             props: {

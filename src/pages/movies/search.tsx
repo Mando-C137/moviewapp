@@ -78,7 +78,10 @@ const Index = () => {
                     } `}
                   >
                     <Link
-                      href={`/movies/${movieTitleToId(result.title)}`}
+                      href={`/movies/${movieTitleToId(
+                        result.title,
+                        new Date(result.release_date).getFullYear()
+                      )}`}
                       className="flex flex-row"
                     >
                       <div className="relative h-16 w-10">

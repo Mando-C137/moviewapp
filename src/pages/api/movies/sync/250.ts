@@ -7,17 +7,15 @@ export default async function handler(
   res: NextApiResponse
 ) {
   if (req.method === "POST") {
-    let allMovies: TmdbResultWithImdbRating[] = [];
     try {
-      allMovies = [...(await fetch250Movies())];
+      const allMovies: TmdbResultWithImdbRating[] = await fetch250Movies();
+      await insertManyMovies(allMovies);
       return res
         .status(200)
         .json({ length: allMovies.length, movies: allMovies });
     } catch (e) {
       return res.status(500).json({ error: "Error when scraping imdb" });
     }
-
-    await insertManyMovies(allMovies);
   } else {
     return res.status(405).json({ error: "Unsupported method." });
   }

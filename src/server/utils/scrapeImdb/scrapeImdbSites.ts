@@ -31,8 +31,10 @@ const scrapeTitleSite = (idPath: string) => {
 const scrapeTop250 = () => {
   return scrapeSite({
     url: "https://www.imdb.com/chart/top/?ref_=nv_mv_250",
-    imdbRatingSelector: ".imdbRating > strong",
-    imdbIdSelector: ".titleColumn > a",
+    imdbRatingSelector:
+      "ipc-rating-star ipc-rating-star--base ipc-rating-star--imdb",
+    imdbIdSelector:
+      "ipc-title ipc-title--base ipc-title--title ipc-title-link-no-icon ipc-title--on-textPrimary sc-43986a27-9 gaoUku cli-title > a",
   });
 };
 
@@ -74,7 +76,12 @@ const scrapeSite = async ({
     }) => {
   const result: ScrapeResult[] = [];
 
-  const imdbSite = await axios.get(url);
+  const imdbSite = await axios.get(url, {
+    headers: {
+      "User-Agent":
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36",
+    },
+  });
   const $ = cheerio.load(imdbSite.data as string);
 
   const ratings = $(imdbRatingSelector);

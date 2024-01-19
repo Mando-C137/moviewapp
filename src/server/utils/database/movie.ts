@@ -4,7 +4,10 @@ import { type TmdbResultWithImdbRating } from "../scrapeImdb/api_from_tmdb";
 import { movieTitleToId } from "../../../utils/helpers";
 
 const getMovieByTitleId = async (id: string) => {
-  return await prisma.movie.findUnique({ where: { id: id } });
+  return await prisma.movie.findUnique({
+    where: { id: id },
+    include: { imdb: true },
+  });
 };
 
 const getMovieByImdbId = async (id: string) => {
@@ -17,8 +20,9 @@ const getMoviesLimited = async (limit = 250) => {
   return await prisma.movie.findMany({
     take: limit > 250 ? 250 : limit,
     orderBy: {
-      rating: "desc",
+      imdb: { rating: "desc" },
     },
+    include: { imdb: true },
   });
 };
 
@@ -50,32 +54,35 @@ const addOrRemoveMovieFromFavorites = async ({
 };
 
 const insertManyMovies = async (tmbdResult: TmdbResultWithImdbRating[]) => {
-  type MovieDb = Prisma.MovieCreateInput;
+  type MovieDb = Prisma.MovieCreateManyInput;
 
   const mapToDb = (res: TmdbResultWithImdbRating): MovieDb => {
     return {
       backdrop_path: res.backdrop_path,
       poster_path: res.poster_path ?? "",
-      og_title: res.original_title,
+      original_title: res.original_title,
       overview: res.overview,
-      rating: res.imdb_rating,
       release_date: new Date(res.release_date),
       tmdb_id: res.id,
       revenue: res.revenue,
       runtime: res.runtime,
       title: res.title,
+      id: movieTitleToId(res.title, new Date(res.release_date).getFullYear()),
       imdb_id: res.imdb_id,
-      id: movieTitleToId(res.title),
     };
   };
 
   const toDbList = tmbdResult.map(mapToDb);
 
-  const storedMovies = await prisma.movie.createMany({
-    data: toDbList,
-    skipDuplicates: true,
-  });
-  console.log(`saved ${storedMovies.count} movies to the db`);
+  try {
+    const storedMovies = await prisma.movie.createMany({
+      data: toDbList,
+      skipDuplicates: true,
+    });
+    console.log(`saved ${storedMovies.count} movies to the db`);
+  } catch (e) {
+    console.error("error when saving movies to the db");
+  }
 };
 
 const createMovie = async (movie: TmdbResultWithImdbRating) => {

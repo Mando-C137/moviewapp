@@ -1,5 +1,3 @@
-import axios from "axios";
-import { env } from "../../../env.mjs";
 import type { ScrapeResult } from "./scrapeImdbSites";
 import { scrape } from "./scrapeImdbSites";
 import type { TmdbResult } from "../tmdb_api";
@@ -26,7 +24,7 @@ const fetchByScrapeIds = async (scrapeResults: ScrapeResult[]) => {
   const result: TmdbResultWithImdbRating[] = [];
   const fetchByImdb = [];
   for (const idAndRating of scrapeResults) {
-    fetchByImdb.push(fetchMovieByImdbId(idAndRating.imdbId));
+    fetchByImdb.push(TMDB_API.fetchMovieByImdbId(idAndRating.imdbId));
   }
 
   const allTmdbIds = await Promise.all(fetchByImdb);
@@ -53,32 +51,14 @@ const fetchByScrapeIds = async (scrapeResults: ScrapeResult[]) => {
 
     result.push({
       ...tmdbResult,
-      imdb_rating:
+      /*  imdb_rating:
         scrapeResults.find((res) => res.imdbId === tmdbResult.imdb_id)
           ?.imdbRating ?? -1,
+      */
     });
   }
   return result;
 };
 
-const fetchMovieByImdbId = async (id: string) => {
-  try {
-    const response = await axios.get(
-      `${env.TMDB_BASE_URL}/find/${id}?api_key=${env.TMDB_CLIENT_ID}&language=en-US&external_source=imdb_id`
-    );
-    return response.data as ImdbResult;
-  } catch (e) {
-    console.log(`error when fetching by imdb id with id = ${id}`);
-    return "error";
-  }
-};
-
-type ImdbResult = {
-  movie_results: {
-    id: number;
-    title: string;
-  }[];
-};
-
-export { fetch250Movies, fetch1000Movies, scrapeByImdbId, fetchMovieByImdbId };
-export type TmdbResultWithImdbRating = TmdbResult & { imdb_rating: number };
+export { fetch250Movies, fetch1000Movies, scrapeByImdbId };
+export type TmdbResultWithImdbRating = TmdbResult;

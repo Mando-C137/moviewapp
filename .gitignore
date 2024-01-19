@@ -49,3 +49,8 @@ yarn-error.log*
 !.vscode/launch.json
 !.vscode/extensions.json
 !.vscode/*.code-snippets
+
+
+# custom
+/prisma/data.tsv
+dev.db

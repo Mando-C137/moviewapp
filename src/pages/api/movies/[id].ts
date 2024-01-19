@@ -7,7 +7,7 @@ import {
 } from "../../../server/utils/database/movie";
 import { fetchMovieByImdbId } from "../../../server/utils/scrapeImdb/api_from_tmdb";
 import { scrape } from "../../../server/utils/scrapeImdb/scrapeImdbSites";
-import TMDB_API from "../../../server/utils/tmdb_api";
+import * as TMDB_API from "../../../server/utils/tmdb_api";
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
