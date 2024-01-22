@@ -18,19 +18,24 @@ import serialize from "../../../server/utils/database/serialize";
 import * as TMDB_API from "../../../server/utils/tmdb_api";
 import Button from "../../../components/button/Button";
 import Routepage from "../../../components/Route/Routepage";
-import { useRegisterTreeData } from "../../../store/NavStore";
 
 const Index = ({
   collection,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   //tmdbIds
-  const [collectedMovies, setCollectedMovies] = useState<SearchResult[]>(
-    collection.movies.map((movie) => ({
-      ...movie,
-      popularity: 0,
+  const initCollectedMovies: SearchResult[] = collection.movies
+    .map((movie) => movie.movie)
+    .map((movie) => ({
       id: movie.tmdb_id,
-    }))
-  );
+      backdrop_path: movie.backdrop_path,
+      poster_path: movie.poster_path,
+      release_date: movie.release_date,
+      title: movie.title,
+      popularity: 1,
+    }));
+
+  const [collectedMovies, setCollectedMovies] =
+    useState<SearchResult[]>(initCollectedMovies);
   const [collectionTitle, setCollectionTitle] = useState(collection.title);
   const [collectionDescription, setCollectionDescription] = useState(
     collection.description
@@ -65,8 +70,9 @@ const Index = ({
     collectedMovies.length != collection.movies.length ||
     collectedMovies.every(
       (movie) =>
-        collection.movies.find((oldMovie) => movie.id !== oldMovie.tmdb_id) ===
-        undefined
+        collection.movies.find(
+          (oldMovie) => movie.id !== oldMovie.movie.tmdb_id
+        ) === undefined
     );
   // Stop the invocation of the debounced function
   // after unmounting

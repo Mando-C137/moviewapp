@@ -84,7 +84,9 @@ const ReviewerPage = ({
                   {collection.title}
                 </h3>
               </Link>
-              <MovieCarousel movies={collection.movies} />
+              <MovieCarousel
+                movies={collection.movies.map((movie) => movie.movie)}
+              />
             </div>
           ))}
         </div>
@@ -109,7 +111,7 @@ export const getServerSideProps = async (
         include: { movie: true },
       },
       favorites: true,
-      collections: { include: { movies: true } },
+      collections: { include: { movies: { include: { movie: true } } } },
       _count: { select: { favorites: true, reviews: true, collections: true } },
     },
   });

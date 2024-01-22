@@ -64,12 +64,12 @@ const Index = ({
 
         <div className="grid grid-cols-3 gap-3 rounded-lg bg-mygray-100 p-4  shadow-md lg:grid-cols-4 lg:gap-5">
           {collection.movies.map((movie) => (
-            <div key={movie.tmdb_id}>
+            <div key={movie.movie.tmdb_id}>
               <div className="relative h-40 w-24 rounded-lg lg:m-4 lg:h-60 lg:w-36">
                 <Image
                   fill
-                  src={TMDB_API.posterpathImagepath(movie.poster_path)}
-                  alt={`Image of ${movie.title}`}
+                  src={TMDB_API.posterpathImagepath(movie.movie.poster_path)}
+                  alt={`Image of ${movie.movie.title}`}
                   className="absolute rounded-lg object-cover shadow-lg"
                 />
               </div>

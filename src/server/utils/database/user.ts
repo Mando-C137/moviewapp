@@ -64,21 +64,31 @@ export const createCollectionForUser = async ({
       title,
       ownerId: userId,
       description,
+    },
+  });
+
+  const updatedCollection = prisma.collection.update({
+    where: {
+      id: createdCollection.id,
+    },
+    data: {
       movies: {
-        connect: movieIds.map((movieId) => {
-          return { tmdb_id: movieId };
-        }),
+        create: movieIds.map((movieId, i) => ({ movieId, rank: i + 1 })),
       },
     },
   });
-  return createdCollection;
+
+  return updatedCollection;
 };
 
 export const getCollectionById = async (id: string) => {
   try {
     const collection = await prisma.collection.findUnique({
       where: { id },
-      include: { owner: true, movies: true },
+      include: {
+        owner: true,
+        movies: { include: { movie: true }, orderBy: { rank: "asc" } },
+      },
     });
     return collection === null ? ("error" as const) : collection;
   } catch (e) {
@@ -86,20 +96,28 @@ export const getCollectionById = async (id: string) => {
   }
 };
 
-export const setCollectionMovies = async ({
+const setCollectionMovies = async ({
   id,
   movieIds,
 }: {
   id: string;
   movieIds: number[];
 }) => {
-  const movies = movieIds.map((movieId) => {
-    return { tmdb_id: movieId };
-  });
   try {
+    await prisma.collectionMovie.deleteMany({
+      where: { collectionId: id },
+    });
+
     const collection = await prisma.collection.update({
       where: { id },
-      data: { movies: { set: movies } },
+      data: {
+        movies: {
+          create: movieIds.map((movieId, i) => ({
+            movieId: movieId,
+            rank: i + 1,
+          })),
+        },
+      },
     });
     return collection;
   } catch (e) {
@@ -124,14 +142,9 @@ export const editCollection = async (
     data: {
       title,
       description,
-      movies: {
-        set: movieIds.map((movieId) => {
-          return { tmdb_id: movieId };
-        }),
-      },
     },
   });
-  return createdCollection;
+  return await setCollectionMovies({ id: createdCollection.id, movieIds });
 };
 
 export const deleteCollection = async (collectionId: string) => {

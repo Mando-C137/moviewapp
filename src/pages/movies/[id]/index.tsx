@@ -18,7 +18,6 @@ import { HeartIcon as OutlineHeartIcon } from "@heroicons/react/24/outline";
 import axios from "axios";
 import type { Serialized } from "../../../server/utils/database/serialize";
 import serialize from "../../../server/utils/database/serialize";
-import type { Movie } from "@prisma/client";
 import * as TMDB_API from "../../../server/utils/tmdb_api";
 import { movieTitleToId } from "../../../utils/helpers";
 import Button from "../../../components/button/Button";
@@ -28,7 +27,10 @@ type Params = ParsedUrlQuery & {
   id: string;
 };
 type Props = {
-  movie: Serialized<Movie>;
+  movie: Exclude<
+    Serialized<Awaited<ReturnType<typeof getMovieByTitleId>>>,
+    null
+  >;
 };
 
 const MovieComponent = ({
@@ -55,7 +57,7 @@ const MovieComponent = ({
         ).data;
 
         setMovieLiked(
-          favourites.favourites.some((tmdb_id) => tmdb_id === movie.tmdb_id)
+          favourites.favourites.some((tmdb_id) => tmdb_id === movie?.tmdb_id)
         );
       } catch (e) {
         setMovieLiked(null);
@@ -182,7 +184,10 @@ export const getServerSideProps: GetServerSideProps<Props, Params> = async ({
       };
     }
 
-    const tmdbResult = await TMDB_API.searchMovie(params.id);
+    const tmdbResult = await TMDB_API.searchMovie(
+      params.id.slice(0, params.id.lastIndexOf("-"))
+    );
+    console.log(`lsel${tmdbResult.map((sdfg) => sdfg.title).join(", ")}`);
     const possibleMovie = tmdbResult.find(
       (result) =>
         movieTitleToId(

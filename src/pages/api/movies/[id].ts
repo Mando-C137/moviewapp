@@ -5,7 +5,7 @@ import {
   getMovieByTmdbId,
   insertManyMovies,
 } from "../../../server/utils/database/movie";
-import { fetchMovieByImdbId } from "../../../server/utils/scrapeImdb/api_from_tmdb";
+import { fetchMovieByImdbId } from "../../../server/utils/tmdb_api";
 import { scrape } from "../../../server/utils/scrapeImdb/scrapeImdbSites";
 import * as TMDB_API from "../../../server/utils/tmdb_api";
 export default async function handler(
@@ -32,7 +32,7 @@ export default async function handler(
         result.movie_results[0]?.id
       );
       if (data !== "error") {
-        await insertManyMovies([{ ...data, imdb_rating: rating as number }]);
+        await insertManyMovies([{ ...data }]);
         res
           .status(200)
           .json({ OK: `Created movie with imdbId ${id as string}` });
@@ -49,7 +49,7 @@ const handleGET = async (id: string, res: NextApiResponse) => {
   const movie = await getMovieByTmdbId(myId);
 
   if (movie) {
-    res.status(200).json(movie.og_title);
+    res.status(200).json(movie.original_title);
   } else {
     res.status(404).json({ error: `movie with id ${id} was not found.` });
   }

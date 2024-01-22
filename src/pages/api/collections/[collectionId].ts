@@ -39,6 +39,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     try {
       await addMoviesIfDonotExist(body.data.movieIds);
       const collection = await editCollection(collectionId, body.data);
+      if (collection === "error")
+        throw new Error("error when putting the collection");
       return res.status(200).json({ collection });
     } catch (e) {
       return res

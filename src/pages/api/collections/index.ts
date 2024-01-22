@@ -1,10 +1,10 @@
-import { NextApiRequest, NextApiResponse } from "next";
+import type { NextApiRequest, NextApiResponse } from "next";
 import { z } from "zod";
 import { getServerAuthSession } from "../../../server/auth";
 import { createCollectionForUser } from "../../../server/utils/database/user";
 import * as TMDB_API from "../../../server/utils/tmdb_api";
 import { insertManyMovies } from "../../../server/utils/database/movie";
-import { TmdbResult } from "../../../server/utils/tmdb_api";
+import type { TmdbResult } from "../../../server/utils/tmdb_api";
 
 const handler = async function (req: NextApiRequest, res: NextApiResponse) {
   const session = await getServerAuthSession({ req, res });
@@ -52,7 +52,7 @@ export const addMoviesIfDonotExist = async (tmdb_ids: number[]) => {
     await Promise.all(tmdb_ids.map((id) => TMDB_API.fetchMovieByTmdbId(id)))
   ).filter((movie): movie is TmdbResult => movie !== "error");
 
-  await insertManyMovies(movies.map((movie) => ({ ...movie, imdb_rating: 0 })));
+  await insertManyMovies(movies);
 };
 
 export const postCollectionSchema = z.object({
