@@ -23,6 +23,7 @@ const server = z.object({
   GOOGLE_ID: z.string(),
   GOOGLE_SECRET: z.string(),
   TMDB_CLIENT_ID: z.string(),
+  TMDB_ACCESS_TOKEN: z.string(),
   TMDB_BASE_URL: z.string(),
 });
 
@@ -48,6 +49,7 @@ const processEnv = {
   GOOGLE_ID: process.env.GOOGLE_ID,
   GOOGLE_SECRET: process.env.GOOGLE_SECRET,
   TMDB_CLIENT_ID: process.env.TMDB_CLIENT_ID,
+  TMDB_ACCESS_TOKEN: process.env.TMDB_ACCESS_TOKEN,
   TMDB_BASE_URL: process.env.TMDB_BASE_URL,
   // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
 };
