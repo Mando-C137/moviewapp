@@ -1,6 +1,7 @@
 import { prisma } from "../../db";
 import { type TmdbResultWithImdbRating } from "../scrapeImdb/api_from_tmdb";
 import { movieTitleToId } from "../../../utils/helpers";
+import type { TmdbResult } from "../tmdb_api";
 
 const getMovieByTitleId = async (id: string) => {
   return await prisma.movie.findUnique({
@@ -21,7 +22,7 @@ const getMovieByTmdbId = async (id: number) => {
     include: { imdb: true },
   });
 };
-const getMoviesLimited = async (limit = 250) => {
+const getTopRatedMovies = async (limit = 250) => {
   return await prisma.movie.findMany({
     take: limit > 250 ? 250 : limit,
     orderBy: {
@@ -84,12 +85,16 @@ const insertManyMovies = async (tmbdResult: TmdbResultWithImdbRating[]) => {
           where: { id: entity.id },
           create: entity,
           update: entity,
+          include: { imdb: true },
         })
       )
     );
     console.log(`saved ${storedMovies.length} movies to the db`);
+    return storedMovies;
   } catch (e) {
     console.error("error when saving movies to the db");
+    console.error(e);
+    return "error";
   }
 };
 
@@ -101,12 +106,21 @@ const createMovie = async (movie: TmdbResultWithImdbRating) => {
   }
   return await getMovieByTmdbId(movie.id);
 };
+export const filterMoviesWithUnknownImdbId = async (movies: TmdbResult[]) => {
+  const moviesWhoExist = (
+    await prisma.imdbRating.findMany({
+      where: { id: { in: movies.map((movie) => movie.imdb_id) } },
+    })
+  ).map((movie) => movie.id);
+
+  return movies.filter((movie) => moviesWhoExist.includes(movie.imdb_id));
+};
 
 export {
   getMovieByTitleId,
   getMovieByImdbId,
   getMovieByTmdbId,
-  getMoviesLimited,
+  getTopRatedMovies,
   insertManyMovies,
   createMovie,
   addOrRemoveMovieFromFavorites,

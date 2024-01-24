@@ -183,11 +183,9 @@ export const getServerSideProps: GetServerSideProps<Props, Params> = async ({
         },
       };
     }
-
     const tmdbResult = await TMDB_API.searchMovie(
       params.id.slice(0, params.id.lastIndexOf("-"))
     );
-    console.log(`lsel${tmdbResult.map((sdfg) => sdfg.title).join(", ")}`);
     const possibleMovie = tmdbResult.find(
       (result) =>
         movieTitleToId(

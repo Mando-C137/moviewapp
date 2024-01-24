@@ -2,8 +2,8 @@ import type { InferGetStaticPropsType } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import React from "react";
-import { getMoviesLimited } from "../../server/utils/database/movie";
-import serialize, { Serialized } from "../../server/utils/database/serialize";
+import { getTopRatedMovies } from "../../server/utils/database/movie";
+import serialize from "../../server/utils/database/serialize";
 import * as TMDB_API from "../../server/utils/tmdb_api";
 import Routepage from "../../components/Route/Routepage";
 
@@ -61,7 +61,7 @@ const MoviesRoute = ({
 };
 
 export const getStaticProps = async () => {
-  const movies = await getMoviesLimited(100);
+  const movies = await getTopRatedMovies(100);
 
   const serializedMovies = movies.map((movie) => serialize(movie));
   return {
