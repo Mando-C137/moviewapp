@@ -1,4 +1,4 @@
-import type { PropsWithChildren, PropsWithoutRef, ReactElement } from "react";
+import type { PropsWithChildren } from "react";
 import React from "react";
 import useNavStore from "../../store/NavStore";
 import {
@@ -80,7 +80,12 @@ const HeaderDesktopMenu = () => {
 type DesktopMenuItemProps = PropsWithChildren<{
   href: string;
   name: string;
-  Icon: React.ForwardRefExoticComponent<React.SVGProps<SVGSVGElement>>;
+  Icon: React.ForwardRefExoticComponent<
+    Omit<React.SVGProps<SVGSVGElement>, "ref"> & {
+      title?: string | undefined;
+      titleId?: string | undefined;
+    } & React.RefAttributes<SVGSVGElement>
+  >;
 }>;
 
 const DesktopMenuItem = ({
