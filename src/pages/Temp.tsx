@@ -1,28 +1,28 @@
-import { CheckIcon } from "@heroicons/react/24/solid";
+import { CheckIcon, XMarkIcon } from "@heroicons/react/24/solid";
 import axios from "axios";
 import React, { useState } from "react";
 
 const Temp = () => {
-  const [loading, setLoading] = useState(false);
-  const [done, setDone] = useState(false);
+  const [info, setInfo] = useState({ loading: false, success: true });
+
   const initMovie = async () => {
-    setLoading(true);
+    setInfo({ loading: true, success: false });
     try {
       await axios.post("/api/movies/sync/250");
+      setInfo({ loading: false, success: true });
     } catch (e) {
-    } finally {
-      setLoading(false);
-      setDone(true);
+      setInfo({ loading: false, success: false });
     }
   };
+
   return (
     <div className="grid place-items-center bg-gradient-to-r from-violet-500 to-fuchsia-500">
       <button
         className="inline-flex rounded bg-mygray-600 py-2 px-4 text-lg font-bold text-mygray-50"
-        disabled={loading || done}
+        disabled={info.loading}
         onClick={() => void initMovie()}
       >
-        {loading && (
+        {info.loading && (
           <div role="status">
             <svg
               aria-hidden="true"
@@ -44,7 +44,12 @@ const Temp = () => {
           </div>
         )}
         init Movies
-        {done && <CheckIcon className="h-6 w-6 text-green-500" />}
+        {info.success && !info.loading && (
+          <CheckIcon className="h-6 w-6 text-green-500" />
+        )}
+        {!info.success && !info.loading && (
+          <XMarkIcon className="h-6 w-6 text-red-500" />
+        )}
       </button>
     </div>
   );
