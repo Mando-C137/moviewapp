@@ -1,50 +1,51 @@
+"use client";
+import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
-import Link from "next/link";
 import type { ButtonHTMLAttributes } from "react";
 import React from "react";
-
-type Props = (
-  | { as: "button"; action: () => void }
-  | { as: "link"; action: string }
-) &
-  ButtonHTMLAttributes<HTMLButtonElement>;
+import cn from "../../utils/cn";
+import { useFormStatus } from "react-dom";
 
 const buttonVariants = cva(
   "rounded-lg bg-primary-600 px-4 py-2 text-lg font-semibold text-mygray-50 shadow-sm transition-all focus:outline-none focus:ring-4 disabled:bg-primary-400",
   {
     variants: {
       variant: {
-        primary: "text-primary-600",
-        outline: "text-primary-400",
+        primary: "text-primary-600 ",
+        outline: "text-primary-600 bg-mygray-100 ring-2 ring-primary-500",
       },
     },
-  }
+  },
 );
-buttonVariants({ variant: "primary" });
 
-const Button = ({ as, action, children, ...rest }: Props) => {
-  if (as === "button")
-    return (
-      <button
-        type="button"
-        onClick={action}
-        className="rounded-lg bg-primary-600 px-4 py-2 text-lg font-semibold text-mygray-50 shadow-sm transition-all focus:outline-none focus:ring-4 disabled:bg-primary-400"
-        {...rest}
-      >
-        {children}
-      </button>
-    );
+type Props = ButtonHTMLAttributes<HTMLButtonElement> &
+  VariantProps<typeof buttonVariants>;
+
+const Button = ({ children, className, variant, ...rest }: Props) => {
   return (
-    <Link href={action} passHref>
-      <button
-        type="button"
-        role="link"
-        className="rounded-lg bg-mygray-300 px-4 py-2 font-semibold uppercase text-mygray-500 shadow-lg focus:border-0 focus:outline-none focus:ring-2 focus:ring-red-500/70"
-        {...rest}
-      >
-        {children}
-      </button>
-    </Link>
+    <button className={cn(buttonVariants({ className, variant }))} {...rest}>
+      {children}
+    </button>
+  );
+};
+
+export const FormSubmitButton = ({
+  children,
+  className,
+  variant,
+  disabled,
+  ...rest
+}: Omit<Props, "type">) => {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      className={cn(buttonVariants({ className, variant }))}
+      disabled={pending || disabled}
+      {...rest}
+    >
+      {children}
+    </button>
   );
 };
 

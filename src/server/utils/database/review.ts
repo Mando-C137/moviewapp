@@ -1,8 +1,8 @@
 import { prisma } from "../../db";
 
-export const getReviewsWithMovieByMovieId = async (movieId: number) => {
+export const getReviewsWithMovieByMovieId = async (movieSlugId: string) => {
   const reviewsWithMovie = await prisma.movie.findUnique({
-    where: { tmdb_id: movieId },
+    where: { id: movieSlugId },
     include: {
       reviews: {
         include: { reviewer: true },
@@ -14,7 +14,10 @@ export const getReviewsWithMovieByMovieId = async (movieId: number) => {
 };
 
 export const getReviewById = async (id: string) => {
-  return await prisma.review.findUnique({ where: { id: id } });
+  return await prisma.review.findUnique({
+    where: { id: id },
+    include: { movie: true, reviewer: true },
+  });
 };
 
 export const getReviewByMovieIdAndUserId = async ({
@@ -76,6 +79,7 @@ export const updateReview = async ({
     where: {
       id: id,
     },
+    include: { movie: true },
   });
   return updatedReview;
 };

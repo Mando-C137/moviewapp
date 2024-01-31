@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  details > summary {
+    list-style: none;
+  }
+  .star,
+  .ofTen {
+    display: none;
+  }
+  .imdbRatingPlugin {
+    border-radius: 0px !important;
+    display: inline-block;
+    text-decoration: none;
+    margin: 0px 0 !important;
+  }
+  .imdbRatingStyle1 {
+    background-color: #fff;
+    border: 0px !important;
+    font-size: 18px;
+    padding: 0 !important;
+  }
+}

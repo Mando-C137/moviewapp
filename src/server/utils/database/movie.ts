@@ -2,6 +2,7 @@ import { prisma } from "../../db";
 import { type TmdbResultWithImdbRating } from "../scrapeImdb/api_from_tmdb";
 import { movieTitleToId } from "../../../utils/helpers";
 import type { TmdbResult } from "../tmdb_api";
+import { getMoviesIsUsersFavourite } from "./user";
 
 const getMovieByTitleId = async (id: string) => {
   return await prisma.movie.findUnique({
@@ -33,27 +34,27 @@ const getTopRatedMovies = async (limit = 250) => {
 };
 
 const addOrRemoveMovieFromFavorites = async ({
-  movieId,
+  tmdbId,
   userId,
   add,
 }: {
-  movieId: number;
+  tmdbId: number;
   userId: string;
   add: boolean;
 }) => {
   try {
-    const user = add
+    add
       ? await prisma.user.update({
           where: { id: userId },
           data: {
-            favorites: { connect: [{ tmdb_id: movieId }] },
+            favorites: { connect: [{ tmdb_id: tmdbId }] },
           },
         })
       : await prisma.user.update({
           where: { id: userId },
-          data: { favorites: { disconnect: [{ tmdb_id: movieId }] } },
+          data: { favorites: { disconnect: [{ tmdb_id: tmdbId }] } },
         });
-    return user;
+    return await getMoviesIsUsersFavourite({ tmdb_id: tmdbId, userId });
   } catch (e) {
     return "error";
   }
@@ -86,8 +87,8 @@ const insertManyMovies = async (tmbdResult: TmdbResultWithImdbRating[]) => {
           create: entity,
           update: entity,
           include: { imdb: true },
-        })
-      )
+        }),
+      ),
     );
     console.log(`saved ${storedMovies.length} movies to the db`);
     return storedMovies;

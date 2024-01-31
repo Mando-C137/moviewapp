@@ -1,3 +1,4 @@
+"use client"
 import { Menu, Transition } from "@headlessui/react";
 import {
   Bars3Icon,

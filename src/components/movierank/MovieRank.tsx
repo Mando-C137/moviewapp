@@ -1,3 +1,4 @@
+"use client";
 import { Listbox, Transition } from "@headlessui/react";
 import {
   TrashIcon,
@@ -88,15 +89,15 @@ const RankingListbox = ({
   selectedRank,
   setSelectedRank,
 }: {
-  selectedRank: number | null;
-  setSelectedRank: (val: number | null) => void;
+  selectedRank: number;
+  setSelectedRank: (val: number) => void;
 }) => {
   const selectedRankItem = myRanks.find((item) => item.rank === selectedRank);
 
   return (
     <Fragment>
       <div className="w-72 ">
-        <Listbox value={selectedRank} onChange={setSelectedRank}>
+        <Listbox value={selectedRank} onChange={setSelectedRank} name="rating">
           <div className="relative mt-1 ">
             <Listbox.Button className=" relative flex w-full cursor-pointer rounded-lg border-2 border-primary-300 bg-white py-2 pl-2 pr-10 text-left  focus:outline-none focus-visible:border-primary-500 focus-visible:ring-2  focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-primary-300 sm:text-sm">
               {selectedRankItem && (
@@ -166,11 +167,9 @@ const Ranking = ({ rank }: { rank: number }) => {
 
   const { Symbol, color, name } = rankItem;
   return (
-    <div className="flex w-full items-center space-x-4   text-base font-bold">
-      <>
-        {Symbol}
-        <p className={color}>{name}</p>
-      </>
+    <div className="flex w-full items-center space-x-4 text-base font-bold">
+      {Symbol}
+      <p className={color}>{name}</p>
     </div>
   );
 };

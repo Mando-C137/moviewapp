@@ -6,7 +6,6 @@ const ExternalImdbComponent = ({ imdbId }: { imdbId: string }) => {
   React.useEffect(() => {
     setDomLoaded(true);
     const script = document.getElementById("lawl");
-    console.log(script);
     script && window.eval(script.innerHTML);
   }, [setDomLoaded, domLoaded]);
 

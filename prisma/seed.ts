@@ -12,7 +12,7 @@ type ImdbRatingType = Prisma.ImdbRatingCreateInput & { id: string };
 const prisma = new PrismaClient();
 async function main() {
   const createdImdbRatings = await insertImdbtoImdb();
-  await createMoviesFromImdbIds(createdImdbRatings);
+  //await createMoviesFromImdbIds(createdImdbRatings);
 }
 
 const insertImdbtoImdb = async (): Promise<ImdbRatingType[]> => {
@@ -35,18 +35,23 @@ const insertImdbtoImdb = async (): Promise<ImdbRatingType[]> => {
         id: imdbId,
         rating: Number(rating),
       };
-      if (Number(numVotes) > 5000) {
+      if (Number(numVotes) > 100 && entrie.rating > 4) {
         relevantEntries.push(entrie);
       }
     }
   }
-  const users = await prisma.imdbRating.createMany({
-    data: relevantEntries,
-    skipDuplicates: true,
-  });
+  const added = relevantEntries.map((entry) =>
+    prisma.imdbRating.upsert({
+      where: { id: entry.id },
+      create: { ...entry },
+      update: { ...entry },
+    })
+  );
+  const successfullAdds = await prisma.$transaction(added);
+
   console.log(`found ${relevantEntries.length} lines`);
-  console.log(`added ${users.count} entries into imdbRating`);
-  return relevantEntries;
+  console.log(`added ${successfullAdds.length} entries into imdbRating`);
+  return successfullAdds;
 };
 
 // TODO from tmdb_api
@@ -82,8 +87,10 @@ const createMoviesFromImdbIds = async (
       release_date: new Date(result.release_date),
     }));
 
-  const movies = await prisma.movie.createMany({ data: fetchByTMDBPromises });
-  console.log(movies.count);
+  const movies = await prisma.$transaction(
+    fetchByTMDBPromises.map((prom) => prisma.movie.create({ data: prom }))
+  );
+  console.log(movies.length);
 };
 
 // TODO from tmdb_api

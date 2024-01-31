@@ -5,7 +5,7 @@ import { addOrRemoveMovieFromFavorites } from "../../../../server/utils/database
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   if (req.method === "POST") {
     return handlePost(req, res);
@@ -27,7 +27,7 @@ const handlePost = async (req: NextApiRequest, res: NextApiResponse) => {
 
   const dbUser = await addOrRemoveMovieFromFavorites({
     add: true,
-    movieId: Number(id),
+    tmdbId: Number(id),
     userId: user.id,
   });
 
@@ -52,7 +52,7 @@ const handleDelete = async (req: NextApiRequest, res: NextApiResponse) => {
 
   const dbUser = await addOrRemoveMovieFromFavorites({
     add: false,
-    movieId: Number(id),
+    tmdbId: Number(id),
     userId: user.id,
   });
 

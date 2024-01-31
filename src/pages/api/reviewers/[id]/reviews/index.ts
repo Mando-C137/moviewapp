@@ -16,8 +16,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
 const bodySchemaForPostReview = z.object({
   movieId: z.number(),
-  title: z.string(),
-  content: z.string(),
+  title: z.string().min(1),
+  content: z.string().min(1),
   rating: z.number().min(1).max(10).multipleOf(1),
 });
 
